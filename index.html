@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Subastas TGSS · Inmuebles por provincias + Análisis de oportunidad</title>
+<link rel="stylesheet" href="styles.css" />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏛️</text></svg>">
+</head>
+<body>
+<header class="top">
+  <div>
+    <h1>🏛️ Subastas Seguridad Social · Inmuebles</h1>
+    <p class="sub">Fuente oficial: <a href="https://w6.seg-social.es/subastas/SubaSeControladorInter" target="_blank" rel="noopener">w6.seg-social.es — Subastas de Bienes Embargados</a>
+    · <span id="meta-fecha">—</span> · <span id="meta-total">—</span></p>
+  </div>
+  <div class="actions">
+    <button id="btn-actualizar" class="btn primary">↻ Actualizar ahora</button>
+    <button id="btn-json" class="btn">⬆ Cargar JSON</button>
+    <input type="file" id="file-json" accept=".json" hidden />
+    <button id="btn-csv" class="btn">⬇ CSV</button>
+  </div>
+</header>
+
+<nav class="tabs">
+  <button id="tab-resumen" class="active">Resumen</button>
+  <button id="tab-listados">Provincias y detalle</button>
+</nav>
+<div id="view-resumen">
+<section class="kpis" id="kpis"></section>
+
+<section class="panel">
+  <h2>Top 3 oportunidades · listado general</h2>
+  <p class="muted">Mejor score del extracto completo. Acceso directo a la ficha oficial y al análisis.</p>
+  <div class="grid g3" id="top-general"></div>
+</section>
+
+<section class="panel">
+  <h2>Top 3 oportunidades · Alicante</h2>
+  <p class="muted">Mejor score entre los inmuebles de Alicante.</p>
+  <div class="grid g3" id="top-alicante"></div>
+</section>
+</div>
+<div id="view-listados" hidden>
+<section class="panel">
+  <h2>📍 Tabla resumen por provincias</h2>
+  <p class="muted">Las 52 provincias (con 0 donde no hay subastas), nº de inmuebles, precio medio de salida (tipo de enajenación), descuento medio vs tasación y mejor oportunidad. Clic en provincia para filtrar el detalle.</p>
+  <div class="table-wrap"><table id="tbl-prov"><thead><tr>
+    <th>Provincia</th><th>CCAA</th><th>Nº</th><th>Urbanas / Rústicas</th><th>Enajen. media</th><th>Tasación media</th><th>Dto. medio</th><th>Mejor score</th><th></th>
+  </tr></thead><tbody></tbody></table></div>
+</section>
+
+<section class="panel">
+  <h2>🏠 Detalle de inmuebles + análisis de oportunidad</h2>
+  <div class="filters">
+    <input id="f-q" placeholder="🔎 Buscar dirección, municipio…" />
+    <select id="f-prov"><option value="">Todas las provincias</option></select>
+    <select id="f-tipo"><option value="">Rústica + Urbana</option><option>Finca Urbana</option><option>Finca Rústica</option></select>
+    <select id="f-oport"><option value="">Toda oportunidad</option><option value="alta">Alta (≥75)</option><option value="media-alta">Media-Alta (55-74)</option><option value="media">Media (40-54)</option><option value="baja">Baja (&lt;40)</option></select>
+    <select id="f-orden">
+      <option value="score">Orden: mejor oportunidad</option>
+      <option value="enajenacion">Orden: menor precio salida</option>
+      <option value="descuento">Orden: mayor descuento</option>
+      <option value="fecha">Orden: fecha subasta</option>
+    </select>
+    <select id="f-temp" title="Ventana temporal por fecha de subasta">
+      <option value="">Toda fecha</option>
+      <option value="prox30">Subasta próximos 30 días</option>
+      <option value="prox7">Subasta próximos 7 días</option>
+      <option value="pasadas30">Celebradas últimos 30 días</option>
+    </select>
+    <label class="chk"><input type="checkbox" id="f-nuevos" /> Solo nuevos</label>
+    <label class="chk"><input type="checkbox" id="f-sincarga" /> Sin cargas</label>
+  </div>
+  <p class="muted" id="res-count"></p>
+  <div class="table-wrap"><table id="tbl-det"><thead><tr>
+    <th></th><th>Provincia</th><th>Tipo</th><th>Inmueble / municipio</th><th>Tasación</th><th>Cargas</th><th>Salida</th><th>Dto.</th><th>Subasta</th><th>Score</th><th>Enlace</th>
+  </tr></thead><tbody></tbody></table></div>
+</section>
+
+<section class="panel">
+  <h2>📊 Cómo se calcula la oportunidad</h2>
+  <p>Score 0-100 calculado <b>solo con la información oficial del inmueble</b> (tasación, cargas, tipo de enajenación, tipo de finca, precio absoluto y fecha). Sin fuentes externas.</p>
+  <ul>
+    <li><b>Descuento vs tasación</b> (0-48 pts): <code>(tasación − salida) / tasación × 60</code>, capado a 48.</li>
+    <li><b>Cargas</b>: sin cargas +12 · &lt;10% +6 · 10-50% 0 · 50-80% −15 · &gt;80% −25. Las cargas subsisten y las paga el adjudicatario.</li>
+    <li><b>Precio de entrada</b>: salida &lt;30.000€ +8 · &lt;60.000€ +5 · &gt;300.000€ −5.</li>
+    <li><b>Liquidez</b>: urbana +3 (mercado más amplio que rústica).</li>
+    <li><b>Fecha</b>: &gt;30 días +3 · &lt;7 días −5 (urgencia).</li>
+  </ul>
+  <p class="muted">Etiquetas: ≥75 Alta · 55-74 Media-Alta · 40-54 Media · &lt;40 Baja. Revisa siempre la ficha oficial, cargas registrales y visita/expediente en la Dirección Provincial y URE indicada.</p>
+</section>
+</div>
+
+<div id="modal-root"></div>
+<script src="app.js"></script>
+</body>
+</html>

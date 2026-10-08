@@ -1,0 +1,39 @@
+=== 1. PowerShell disponible === 
+C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
+ 
+=== 2. Version y politicas === 
+
+Major  Minor  Build  Revision
+-----  -----  -----  --------
+5      1      26100  9444    
+
+Scope           : MachinePolicy
+ExecutionPolicy : Undefined
+
+
+Scope           : UserPolicy
+ExecutionPolicy : Undefined
+
+
+Scope           : Process
+ExecutionPolicy : Bypass
+
+
+Scope           : CurrentUser
+ExecutionPolicy : Undefined
+
+
+Scope           : LocalMachine
+ExecutionPolicy : Restricted
+
+
+
+ 
+=== 3. Alcance a la TGSS (15s) === 
+TGSS_OK len=4786
+ 
+=== 4. Ficheros === 
+actualizar.bat
+actualizar.ps1
+inmuebles.json
+ 
